@@ -161,6 +161,7 @@ WHERE
 **Objective:** Identify TV shows with more than 5 seasons.
 
 ### 9. Count the Number of Content Items in Each Genre
+''' sql;
 
 SELECT 
     show_id,
@@ -175,9 +176,7 @@ FROM
     ) AS json_each
 ORDER BY total_content DESC;
 
-```sql
-
-```
+```sql;
 
 **Objective:** Count the number of content items in each genre.
 
