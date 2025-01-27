@@ -156,13 +156,11 @@ FROM
 WHERE 
     type = 'TV Show';
 
-```
-
 **Objective:** Identify TV shows with more than 5 seasons.
 
 ### 9. Count the Number of Content Items in Each Genre
-''' sql;
 
+''' sql
 SELECT 
     show_id,
     cast AS full_cast,
@@ -176,8 +174,7 @@ FROM
     ) AS json_each
 ORDER BY total_content DESC;
 
-```sql;
-
+'''
 **Objective:** Count the number of content items in each genre.
 
 ### 10.Find each year and the average numbers of content release in India on netflix. 
