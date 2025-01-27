@@ -93,19 +93,21 @@ WHERE release_year = 2020;
 
 ### 4. Find the Top 5 Countries with the Most Content on Netflix
 
-```sql
-SELECT * 
-FROM
-(
-    SELECT 
-        UNNEST(STRING_TO_ARRAY(country, ',')) AS country,
-        COUNT(*) AS total_content
-    FROM netflix
-    GROUP BY 1
-) AS t1
-WHERE country IS NOT NULL
-ORDER BY total_content DESC
-LIMIT 5;
+```sql;
+SELECT 
+    show_id,
+    cast AS full_cast,
+    JSON_UNQUOTE(JSON_EXTRACT(json_each.value, '$')) AS individual_actor,
+    JSON_LENGTH(CONCAT('["', REPLACE(cast, ',', '","'), '"]')) AS total_content
+FROM 
+    netflix,
+    JSON_TABLE(
+        CONCAT('["', REPLACE(cast, ',', '","'), '"]'),
+        '$[*]' COLUMNS (value JSON PATH '$')
+    ) AS json_each
+ORDER BY total_content DESC;
+
+
 ```
 
 **Objective:** Identify the top 5 countries with the highest number of content items.
@@ -127,22 +129,18 @@ ORDER BY SPLIT_PART(duration, ' ', 1)::INT DESC;
 ```sql
 SELECT *
 FROM netflix
-WHERE TO_DATE(date_added, 'Month DD, YYYY') >= CURRENT_DATE - INTERVAL '5 years';
+WHERE str_to_date(date_added, 'Month DD, YYYY') >= curdate() - INTERVAL '5 years';
 ```
 
 **Objective:** Retrieve content added to Netflix in the last 5 years.
 
 ### 7. Find All Movies/TV Shows by Director 'Rajiv Chilaka'
 
-```sql
-SELECT *
-FROM (
-    SELECT 
-        *,
-        UNNEST(STRING_TO_ARRAY(director, ',')) AS director_name
-    FROM netflix
-) AS t
-WHERE director_name = 'Rajiv Chilaka';
+```sql;
+SELECT * 
+FROM `the netflix`
+WHERE director = 'Rajiv Chilaka';
+
 ```
 
 **Objective:** List all content directed by 'Rajiv Chilaka'.
@@ -150,22 +148,35 @@ WHERE director_name = 'Rajiv Chilaka';
 ### 8. List All TV Shows with More Than 5 Seasons
 
 ```sql
-SELECT *
-FROM netflix
-WHERE type = 'TV Show'
-  AND SPLIT_PART(duration, ' ', 1)::INT > 5;
+SELECT 
+    *, 
+    SUBSTRING_INDEX(duration, ' ', 1) AS seasons
+FROM 
+    netflix
+WHERE 
+    type = 'TV Show';
+
 ```
 
 **Objective:** Identify TV shows with more than 5 seasons.
 
 ### 9. Count the Number of Content Items in Each Genre
 
-```sql
 SELECT 
-    UNNEST(STRING_TO_ARRAY(listed_in, ',')) AS genre,
-    COUNT(*) AS total_content
-FROM netflix
-GROUP BY 1;
+    show_id,
+    cast AS full_cast,
+    JSON_UNQUOTE(JSON_EXTRACT(json_each.value, '$')) AS individual_actor,
+    JSON_LENGTH(CONCAT('["', REPLACE(cast, ',', '","'), '"]')) AS total_content
+FROM 
+    netflix,
+    JSON_TABLE(
+        CONCAT('["', REPLACE(cast, ',', '","'), '"]'),
+        '$[*]' COLUMNS (value JSON PATH '$')
+    ) AS json_each
+ORDER BY total_content DESC;
+
+```sql
+
 ```
 
 **Objective:** Count the number of content items in each genre.
@@ -217,7 +228,7 @@ WHERE director IS NULL;
 SELECT * 
 FROM netflix
 WHERE casts LIKE '%Salman Khan%'
-  AND release_year > EXTRACT(YEAR FROM CURRENT_DATE) - 10;
+  AND release_year > YEAR(curdate()) - 10;
 ```
 
 **Objective:** Count the number of movies featuring 'Salman Khan' in the last 10 years.
@@ -226,13 +237,21 @@ WHERE casts LIKE '%Salman Khan%'
 
 ```sql
 SELECT 
-    UNNEST(STRING_TO_ARRAY(casts, ',')) AS actor,
-    COUNT(*)
-FROM netflix
-WHERE country = 'India'
-GROUP BY actor
-ORDER BY COUNT(*) DESC
-LIMIT 10;
+    show_id,
+    cast AS full_cast,
+    JSON_UNQUOTE(JSON_EXTRACT(json_each.value, '$')) AS individual_actor,
+    JSON_LENGTH(CONCAT('["', REPLACE(cast, ',', '","'), '"]')) AS total_content
+FROM 
+    netflix,
+    JSON_TABLE(
+        CONCAT('["', REPLACE(cast, ',', '","'), '"]'),
+        '$[*]' COLUMNS (value JSON PATH '$')
+    ) AS json_each
+WHERE 
+    country = 'India' -- Filter for shows or actors from India
+ORDER BY total_content DESC
+limit 10;
+
 ```
 
 **Objective:** Identify the top 10 actors with the most appearances in Indian-produced movies.
