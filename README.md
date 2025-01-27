@@ -148,6 +148,7 @@ WHERE director = 'Rajiv Chilaka';
 ### 8. List All TV Shows with More Than 5 Seasons
 
 ```sql
+
 SELECT 
     *, 
     SUBSTRING_INDEX(duration, ' ', 1) AS seasons
@@ -155,10 +156,11 @@ FROM
     netflix
 WHERE 
     type = 'TV Show';
+'''
 
 **Objective:** Identify TV shows with more than 5 seasons.
 
-### 9. Count the Number of Content Items in Each Genre
+ ###9. Count the Number of Content Items in Each Genre
 
 ''' sql
 SELECT 
